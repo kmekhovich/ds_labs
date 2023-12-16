@@ -1,5 +1,7 @@
 ### Языки программирования и продукты на них
 
+http://kmekhovichdslab.pythonanywhere.com/
+
 Бекенд написан на Python с использованием Flask. База данных - MySQL. Фронтенд - HTML с небольшими CSS стилями и скриптами на JavaScript.
 
 Схема базы данных:
