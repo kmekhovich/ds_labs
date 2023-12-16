@@ -5,6 +5,8 @@ import re
 getcontext().prec = 100  # устанавливаем точность вычислений
 
 def is_valid_input(s):
+    if 'e' in s:
+        return False
     if s[0] == '+' or s[0] == '-':
         s = s[1:]
     a = s.replace(',', '.').split('.')

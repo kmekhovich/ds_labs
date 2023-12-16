@@ -21,6 +21,8 @@ def on_sum_click():
 
 def on_diff_click():
     try:
+        if 'e' in entry_num1.get() or 'e' in entry_num2.get():
+            raise ValueError
         num1 = Decimal(entry_num1.get().replace(',', '.'))
         num2 = Decimal(entry_num2.get().replace(',', '.'))
         result = num1 - num2
@@ -34,6 +36,7 @@ def on_diff_click():
 
 root = Tk()
 root.title('Калькулятор')
+root.geometry('800x200')
 
 label_info = Label(root, text='Мехович Константин, 4 группа, 4 курс, 2023')
 label_info.grid(row=0, column=0, columnspan=2)
