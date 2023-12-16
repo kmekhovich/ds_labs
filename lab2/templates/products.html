@@ -1,0 +1,187 @@
+<!-- templates/products.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products</title>
+    <style>
+        /* CSS стили */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Фиксированный лейаут таблицы */
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Текст не переносится на новую строку */
+        }
+        th {
+            cursor: pointer;
+            background-color: #f0f0f0;
+            /* Установите фиксированную ширину для всех столбцов, на ваше усмотрение */
+            width: 20%; /* Пример для равномерного распределения ширины столбцов */
+            height: 40px;
+        }
+        td {
+            height: 50px; /* Фиксированная высота строк */
+        }
+        .filter-input {
+            margin-bottom: 10px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span><a href="{{ url_for('languages') }}">Programming Languages</a></span>
+        <span>Products</span>
+    </div>
+
+    <button onclick="window.location.href='/product_add';">+</button>
+    <table id="products">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Name</th>
+                <th onclick="sortTable(1)">Company</th>
+                <th onclick="sortTable(2)">Created At</th>
+                <th onclick="sortTable(3)">User Count</th>
+                <th onclick="sortTable(4)">Programming Language</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <th><input type="text" id="filter-name" onkeyup="filterTable()" placeholder="Search for names.." class="filter-input"></th>
+                <th><input type="text" id="filter-company" onkeyup="filterTable()" placeholder="Search for companies.." class="filter-input"></th>
+                <th><input type="text" id="filter-date" onkeyup="filterTable()" placeholder="Search for dates.." class="filter-input"></th>
+                <th><input type="text" id="filter-user-count" onkeyup="filterTable()" placeholder="Search for user counts.." class="filter-input"></th>
+                <th><input type="text" id="filter-programming-language" onkeyup="filterTable()" placeholder="Search for languages.." class="filter-input"></th>
+                <th></th> <!-- Нет фильтра для столбца Actions -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.company }}</td>
+                <td>{{ product.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>{{ product.user_count }}</td>
+                {% set programming_language_id_int = product.programming_language_id | int %}
+                {% set selected_language = languages | selectattr("id", "equalto", programming_language_id_int) | first %}
+                <td>
+                <a href="{{ url_for('languages', highlight=programming_language_id_int) }}">
+                {{ selected_language.name if selected_language else 'Language not found' }}
+                </a>
+                </td>
+                <td>
+                    <button onclick="window.location.href='/product_edit/{{ product.id }}';">Edit</button>
+                    <button onclick="if(confirm('Are you sure?')) window.location.href='/product_delete/{{ product.id }}';">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        var currentDir = Array(5).fill(0); // Tracking direction for each column
+        function sortTable(columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("products");
+            switching = true;
+
+            // Determine the direction (ascending or descending)
+            currentDir[columnIndex] = currentDir[columnIndex] != 1 ? 1 : -1;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 2; i < rows.length - 1; i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+
+                    if (columnIndex == 3) {
+                        x = parseInt(x.innerHTML);
+                        y = parseInt(y.innerHTML);
+                    } else {
+                        x = x.innerHTML.toLowerCase();
+                        y = y.innerHTML.toLowerCase();
+                    }
+                    if (currentDir[columnIndex] == 1) {
+                        if (x > y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (currentDir[columnIndex] == -1) {
+                        if (x < y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+
+            // Remove existing arrows
+            var headers = table.getElementsByTagName("TH");
+            for (let header of headers) {
+                header.innerHTML = header.innerHTML.replace(/ ▲| ▼/g, "");
+            }
+
+            // Add the right arrow
+            if (currentDir[columnIndex] == 1) {
+                headers[columnIndex].innerHTML += " ▲";
+            } else {
+                headers[columnIndex].innerHTML += " ▼";
+            }
+        }
+        function filterTable() {
+            var inputName = document.getElementById("filter-name");
+            var inputCompany = document.getElementById("filter-company");
+            var inputDate = document.getElementById("filter-date");
+            var inputUserCount = document.getElementById("filter-user-count");
+            var inputProgrammingLanguage = document.getElementById("filter-programming-language");
+            var filterName = inputName.value.toUpperCase();
+            var filterCompany = inputCompany.value.toUpperCase();
+            var filterDate = inputDate.value.toUpperCase();
+            var filterUserCount = inputUserCount.value.toUpperCase();
+            var filterProgrammingLanguage = inputProgrammingLanguage.value.toUpperCase();
+            var table = document.getElementById("products");
+            var tr = table.getElementsByTagName("tr");
+
+            // Проход по строкам таблицы и скрытие тех, которые не соответствуют поиску
+            for (var i = 2; i < tr.length; i++) { // начинаем с i = 2, чтобы пропустить заголовок и ряд фильтров
+                var tdName = tr[i].getElementsByTagName("td")[0];
+                var tdCompany = tr[i].getElementsByTagName("td")[1];
+                var tdDate = tr[i].getElementsByTagName("td")[2];
+                var tdUserCount = tr[i].getElementsByTagName("td")[3];
+                var tdProgrammingLanguage = tr[i].getElementsByTagName("td")[4];
+                if (tdName && tdCompany && tdDate && tdUserCount && tdProgrammingLanguage) {
+                    var txtValueName = tdName.textContent || tdName.innerText;
+                    var txtValueCompany = tdCompany.textContent || tdCompany.innerText;
+                    var txtValueDate = tdDate.textContent || tdDate.innerText;
+                    var txtValueUserCount = tdUserCount.textContent || tdUserCount.innerText;
+                    var txtValueProgrammingLanguage = tdProgrammingLanguage.textContent || tdProgrammingLanguage.innerText;
+                    if (txtValueName.toUpperCase().indexOf(filterName) > -1 &&
+                        txtValueCompany.toUpperCase().indexOf(filterCompany) > -1 &&
+                        txtValueDate.toUpperCase().indexOf(filterDate) > -1 &&
+                        txtValueUserCount.toUpperCase().indexOf(filterUserCount) > -1 &&
+                        txtValueProgrammingLanguage.toUpperCase().indexOf(filterProgrammingLanguage) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

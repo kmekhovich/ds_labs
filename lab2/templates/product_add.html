@@ -1,0 +1,39 @@
+<!-- templates/product_add.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a New Product</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <span><a href="{{ url_for('products') }}">Back to products</a></span>
+    </div>
+
+    <h1>Add a New Product</h1>
+    <form method="post">
+        <label for="name">Product Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="company">Company:</label><br>
+        <input type="text" id="company" name="company" required><br>
+
+        <label for="created_at">Created At:</label><br>
+        <input type="date" id="created_at" name="created_at" required><br>
+
+        <label for="user_count">User Count:</label><br>
+        <input type="number" id="user_count" name="user_count" min="0" required><br>
+
+        <label for="programming_language">Programming Language:</label><br>
+        <select id="programming_language" name="programming_language_id" required>
+            <option value="">-- Select a Programming Language --</option>
+            {% for language in languages %}
+            <option value="{{ language.id }}">{{ language.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <input type="submit" value="Add">
+    </form>
+</body>
+</html>

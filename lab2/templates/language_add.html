@@ -1,0 +1,33 @@
+<!-- templates/language_add.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Programming Language</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
+<body>
+    <h1>Add a New Programming Language</h1>
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="created_at">Created At:</label><br>
+        <input type="date" id="created_at" name="created_at" required><br>
+
+        <label for="rank">Rank:</label><br>
+        <input type="number" id="rank" name="rank" min="1" required><br>
+
+        <input type="submit" value="Add">
+    </form>
+
+</body>
+</html>
+

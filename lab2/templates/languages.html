@@ -1,0 +1,174 @@
+<!-- templates/languages.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Programming Languages</title>
+    <style>
+        /* CSS стили */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* Фиксированный лейаут таблицы */
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap; /* Текст не переносится на новую строку */
+        }
+        th {
+            cursor: pointer;
+            background-color: #f0f0f0;
+            /* Установите фиксированную ширину для всех столбцов, на ваше усмотрение */
+            width: 25%; /* Пример для равномерного распределения ширины столбцов */
+            height: 40px;
+        }
+        td {
+            height: 50px; /* Фиксированная высота строк */
+        }
+        .filter-input {
+            margin-bottom: 10px;
+            margin-top: 5px;
+        }
+        .highlight {
+            background-color: yellow; /* Цвет подсветки */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span>Programming Languages</span>
+        <span><a href="{{ url_for('products') }}">Products</a></span>
+    </div>
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+        {% if messages %}
+            {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <button onclick="window.location.href='/language_add';">+</button>
+    <table id="languages">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Name</th>
+                <th onclick="sortTable(1)">Created At</th>
+                <th onclick="sortTable(2)">Rank</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <th><input type="text" id="filter-name" onkeyup="filterTable()" placeholder="Search for names.." class="filter-input"></th>
+                <th><input type="text" id="filter-date" onkeyup="filterTable()" placeholder="Search for dates.." class="filter-input"></th>
+                <th><input type="text" id="filter-rank" onkeyup="filterTable()" placeholder="Search for ranks.." class="filter-input"></th>
+                <th></th> <!-- Нет фильтра для столбца Actions -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for language in languages %}
+            <tr class="{{ 'highlight' if request.args.get('highlight')|int == language.id }}">
+                <td>{{ language.name }}</td>
+                <td>{{ language.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>{{ language.rank }}</td>
+                <td>
+                    <button onclick="window.location.href='/language_edit/{{ language.id }}';">Edit</button>
+                    <button onclick="if(confirm('Are you sure?')) window.location.href='/language_delete/{{ language.id }}';">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        var currentDir = Array(3).fill(0); // Tracking direction for each column
+        function sortTable(columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("languages");
+            switching = true;
+
+            // Determine the direction (ascending or descending)
+            currentDir[columnIndex] = currentDir[columnIndex] != 1 ? 1 : -1;
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 2; i < rows.length - 1; i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+
+                    if (columnIndex == 2) {
+                        x = parseInt(x.innerHTML);
+                        y = parseInt(y.innerHTML);
+                    } else {
+                        x = x.innerHTML.toLowerCase();
+                        y = y.innerHTML.toLowerCase();
+                    }
+                    if (currentDir[columnIndex] == 1) {
+                        if (x > y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (currentDir[columnIndex] == -1) {
+                        if (x < y) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                }
+            }
+
+            // Remove existing arrows
+            var headers = table.getElementsByTagName("TH");
+            for (let header of headers) {
+                header.innerHTML = header.innerHTML.replace(/ ▲| ▼/g, "");
+            }
+
+            // Add the right arrow
+            if (currentDir[columnIndex] == 1) {
+                headers[columnIndex].innerHTML += " ▲";
+            } else {
+                headers[columnIndex].innerHTML += " ▼";
+            }
+        }
+        function filterTable() {
+            var inputName = document.getElementById("filter-name");
+            var inputDate = document.getElementById("filter-date");
+            var inputRank = document.getElementById("filter-rank");
+            var filterName = inputName.value.toUpperCase();
+            var filterDate = inputDate.value.toUpperCase();
+            var filterRank = inputRank.value.toUpperCase();
+            var table = document.getElementById("languages");
+            var tr = table.getElementsByTagName("tr");
+
+            // Проход по строкам таблицы и скрытие тех, которые не соответствуют поиску
+            for (var i = 2; i < tr.length; i++) { // начинаем с i = 2, чтобы пропустить заголовок и ряд фильтров
+                var tdName = tr[i].getElementsByTagName("td")[0];
+                var tdDate = tr[i].getElementsByTagName("td")[1];
+                var tdRank = tr[i].getElementsByTagName("td")[2];
+                if (tdName && tdDate && tdRank) {
+                    var txtValueName = tdName.textContent || tdName.innerText;
+                    var txtValueDate = tdDate.textContent || tdDate.innerText;
+                    var txtValueRank = tdRank.textContent || tdRank.innerText;
+                    if (txtValueName.toUpperCase().indexOf(filterName) > -1 &&
+                        txtValueDate.toUpperCase().indexOf(filterDate) > -1 &&
+                        txtValueRank.toUpperCase().indexOf(filterRank) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

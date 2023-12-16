@@ -1,0 +1,25 @@
+<!-- templates/language_edit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Programming Language</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
+<body>
+    <h1>Edit Programming Language</h1>
+    <form method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" value="{{ language.name }}" required><br>
+
+        <label for="created_at">Created At:</label><br>
+        <input type="date" id="created_at" name="created_at" value="{{ language.created_at.strftime('%Y-%m-%d') }}" required><br>
+
+        <label for="rank">Rank:</label><br>
+        <input type="number" id="rank" name="rank" value="{{ language.rank }}" min="1" required><br>
+
+        <input type="submit" value="Save Changes">
+    </form>
+</body>
+</html>
+
