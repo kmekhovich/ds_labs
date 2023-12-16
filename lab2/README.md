@@ -25,8 +25,8 @@ CREATE TABLE products (
 );
 ```
 
-Ранк - место в рейтинге согласно статье https://habr.com/ru/articles/730954/
-Продукты компаний взял отсюда: https://rigorousthemes.com/blog/best-programming-software-examples/
+ - Ранк - место в рейтинге согласно статье https://habr.com/ru/articles/730954/
+ - Продукты компаний взял отсюда: https://rigorousthemes.com/blog/best-programming-software-examples/
 
 ## Некоторый функционал
  - Сортировка по столбцам при нажатии на них
